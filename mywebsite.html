@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles2.css">
+    <title>WeHelp Bootcamp 申請網站──報名資料</title>
+    <script src="script2.js"></script>
+</head>
+<body>
+<div class="head">
+WeHelp Bootcamp 申請網站──報名資料
+</div>
+    <div class="floating-box" id="floatingBox">
+        <!-- 將段落標題添加到這裡 -->
+        <div style="font-weight:bold; margin-bottom: 10px;">跳轉選單</div>
+        <div class="box-content" onclick="scrollToSection('section1')">題一、自我介紹</div>
+        <div class="box-content" onclick="scrollToSection('section2')">題二、作品分享</div>
+        <div class="box-content" onclick="scrollToSection('section3')">題三、時間規劃</div>
+        <div class="box-content" onclick="scrollToSection('section4')">題四、工作期望</div>       
+        <div class="box-content" onclick="scrollToSection('section5')">題五、負面情緒</div>
+        <div class="box-content" onclick="scrollToSection('section6')">題六、開發心得</div>       
+        <div class="box-content" onclick="scrollToSection('section7')">題七、交往準則</div>
+        <div class="box-content" onclick="scrollToSection('luckycat')" style="color:#d4d4d4;">好運貓貓感謝您</div>
+
+        <!-- 添加更多標題 -->
+    </div>
+
+
+<div class="body" style="margin-bottom: 200px;">
+    <div id="section1" class="section-title">
+        一、自我介紹
+     </div>
+    <div class="context">
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        我是古亦弘。1998年生，現年25歲，去年底於台大森林系研究所碩士畢業，主要學習生物技術，目前正在服四個月的義務兵役，
+        原先預計進入生技公司工作，但考慮工作的成長性以及自身的興趣，
+        在聽聞兩個朋友在Wehelp的經驗後，決定在進入職場之前，先試試看自己是否適合軟體工程師這份工作，
+        因此決定報名課程。
+    </div>
+    <div id="section2" class="section-title">
+        二、為了成為軟體工程師，做過什麼努力？
+    </div>
+    
+    <div class="context">
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        我在大學二年級至三年級期間陸續修了計算機概論、C/C++程式設計、Java 計算機程式設計和統計學等課程，
+        在課程中學習到了計算機的基礎以及HTML、C語言、Java和R語言，雖然課程皆只有一學期且課程內容大部分我已經遺忘，
+        但我對於程式語言的撰寫已有了基礎的認識，也曾享受過埋頭研究一晚上後，
+        終於把想要的結果寫出來並欲行成功地成就感。到了近期，程式語言已經實質上幫助處理我所遇到的問題，在此我想分享兩個案例。
+    </div>
+   
+    <div class="context">
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        案例一是某次研究所老師希望我用L型的角鐵製作一個雙層鐵架供儀器置放，
+        但材料相當有限，我幾乎沒有出錯浪費材料的空間。在我苦惱之際，
+        我找到了一個軟體名為Open SCAD，其能利用程式語言的撰寫邏輯繪製3D物件，
+        經過閱讀部分指南後，我順利地繪製出鐵架的模型，
+        利用此方式製作3D模型的優勢在於後續調整的便利性，
+        只需要修改部分的參數設定值及可以得到調整後的3D模型，
+        我也實際上運用此優勢省了不少時間。最後藉由參照模型的比例，
+        在沒有浪費材料且最大利用所有材料情況下完成鐵架的組裝。
+    </div>
+
+    <div class="fold-container1" style="margin-top: 20px;margin-bottom: 20px;">
+        <div class="fold-header1" onclick="toggleFold1()">點擊此處以 展開/收合 案例一程式碼與說明</div>
+        <div class="fold-content1">
+          <!-- Your content goes here -->
+          <p>&nbsp;&nbsp;&nbsp;&nbsp;下面是我所撰寫的程式碼。
+            其運作邏輯是先實際測量角鐵重複鎖孔排列的最小單元及各種洞口之尺寸數據
+            ，將該module命名為unit()，先以函數cube()繪製長方體，再以函數difference()
+            以減法加工的概念刻出單位角鐵和鎖孔 (圖一)，
+            在unit()中設定變數unit(m)，以m控制各所孔相對位移的距離和定位，
+            以module unit(m)為基礎變換方向和組合後建立直立柱的module coner(m)和
+            橫向支架的frame(m)，最後根據鎖孔的位置有無對齊，細調整變數m、coner和frame的位置即完成 (圖二)。</p>
+            
+            <div class="flex">
+                <div><img src="Unitt.png" alt="Foldable Image">
+                    <div>圖一 單位角鐵 </div>
+                </div>
+                <div><img src="All.png" alt="Foldable Image">
+                    <div>圖二 角鐵架 </div>
+                </div>
+            </div>
+           <div class="code">
+            L=76; <br/>
+            R=4.5; <br/>
+            T=1.5; <br/>
+            ux=50; <br/>
+            uy=76; <br/>
+            uz=32; <br/>
+            module unit(m){ <br/>
+            difference()<br/>
+                { <br/>
+                cube([ux,uy,uz]); //原塊    <br/>
+                translate([T,0,T]) <br/>
+                    cube([ux-T,uy,uz-T]); //削減  <br/>
+                translate([38,uy/2+m,0]) <br/>
+                    linear_extrude(T) <br/>
+                        circle(R); //長中圓洞         <br/>
+                linear_extrude(T) <br/>
+                    hull() { <br/>
+                        translate([38,uy/2-21.5+m,0]) circle(R); <br/>
+                        translate([38,uy/2-16.5+m,0]) circle(R); //長前橢圓洞<br/>
+                        }  <br/>
+                linear_extrude(T) <br/>
+                    hull() { <br/>
+                        translate([38,uy/2+16.5+m,0]) circle(R); <br/>
+                        translate([38,uy/2+21.5+m,0]) circle(R); //長後橢圓洞<br/>
+                        }      <br/>
+                linear_extrude(T) <br/>
+                    hull() { <br/>
+                        translate([21,uy/2-21.5+m,0]) circle(R); <br/>
+                        translate([21,uy/2+21.5+m,0]) circle(R); //大洞<br/>
+                        }          <br/>
+                linear_extrude(T) <br/>
+                    hull() { <br/>
+                        translate([38,0+m,0]) circle(R); <br/>
+                        translate([34,0+m,0]) circle(R); //長前直洞<br/>
+                        }         <br/>
+                linear_extrude(T) <br/>
+                    hull() { <br/>
+                        translate([38,uy+m,0]) circle(R); <br/>
+                        translate([34,uy+m,0]) circle(R); //長後直洞<br/>
+                        } <br/>
+                translate([0,uy/2+m,20]) <br/>
+                    rotate([0,90,0]){ <br/>
+                        linear_extrude(T) <br/>
+                        circle(R);}   //短中圓洞   <br/>
+                translate([0,uy/2-21.5+m,20]) <br/>
+                    rotate([0,90,0]){ <br/>
+                        linear_extrude(T) <br/>
+                            hull() { <br/>
+                            translate([0,0,0]) circle(R); <br/>
+                            translate([0,5,0]) circle(R); <br/>
+                            } <br/>
+                     }        //短前橢圓洞<br/>
+                translate([0,uy/2+16.5+m,20]) <br/>
+                    rotate([0,90,0]){ <br/>
+                        linear_extrude(T) <br/>
+                            hull() { <br/>
+                            translate([0,0,0]) circle(R); <br/>
+                            translate([0,5,0]) circle(R); <br/>
+                            } <br/>
+                    }         // 短後橢圓洞  <br/>
+                translate([0,0+m,20]) <br/>
+                    rotate([0,90,0]){ <br/>
+                        linear_extrude(T) <br/>
+                            hull() { <br/>
+                            translate([0,0,0]) circle(R); <br/>
+                            translate([5,0,0]) circle(R); <br/>
+                            }  <br/>
+                    }           //短前直洞<br/>
+                translate([0,uy+m,20]) <br/>
+                    rotate([0,90,0]){ <br/>
+                        linear_extrude(T) <br/>
+                            hull() { <br/>
+                            translate([0,0,0]) circle(R); <br/>
+                            translate([5,0,0]) circle(R); <br/>
+                            } <br/> 
+                    }           //短後直洞<br/>    
+                if (uy/2+16.5+m+R>uy){ <br/>
+                    linear_extrude(T) <br/>
+                        hull() { <br/>
+                        translate([38,uy/2+16.5+m-uy,0]) circle(R); <br/>
+                        translate([38,uy/2+21.5+m-uy,0]) circle(R); //長後橢圓洞回<br/>
+                        } <br/>
+                    linear_extrude(T) <br/>
+                        hull() { <br/>
+                            translate([21,uy/2-21.5+m-uy,0]) circle(R); <br/>
+                            translate([21,uy/2+21.5+m-uy,0]) circle(R); //大洞回<br/>
+                        }   <br/>
+                    translate([0,uy/2+16.5+m-uy,20]) <br/>
+                        rotate([0,90,0]){ <br/>
+                            linear_extrude(T) <br/>
+                                hull() { <br/>
+                                    translate([0,0,0]) circle(R); <br/>
+                                    translate([0,5,0]) circle(R);   // 短後橢圓洞回<br/>
+                                    } <br/>
+                            } <br/>
+                    } <br/>        
+                 if (uy/2+m+R>uy){ <br/>
+                     translate([38,uy/2+m-uy,0]) <br/>
+                        linear_extrude(T) circle(R); //長中圓洞回<br/>  
+                     translate([0,uy/2+m-uy,20]) <br/>
+                        rotate([0,90,0]){ <br/>
+                            linear_extrude(T) <br/>
+                            circle(R);}   //短中圓洞回<br/>
+            <br/>         
+            <br/>         
+                     
+                     
+                     
+                     } <br/>
+                }                                                   //單位角鋼<br/>
+            }                                                       //模塊設定<br/>
+            
+            
+            
+            module polynumber(num) { <br/>
+               for (i = [0 : num-1]) <br/>
+                 translate([ 0, uy*i, 0 ]) children(0); <br/>
+            } <br/>
+            module coner (x,y,H,m) { <br/>
+            rotate([90,0,90])polynumber(H){ unit(m);} <br/>
+            translate([x,0,0]) mirror([1,0,0]) rotate([90,0,90])polynumber(H){ unit(m);} <br/>
+            translate([0,y,0]) mirror([0,1,0]) rotate([90,0,90])polynumber(H){ unit(m);} <br/>
+            translate([x,y,0]) rotate([90,0,270])polynumber(H){ unit(m);} <br/>
+            } <br/>
+            <br/>
+            
+            
+            module frame(xn,yn,xm,ym){ <br/>
+                translate([T+T,T,ux]) mirror([1,0,0])   rotate([270,90,0]) polynumber(xn) <br/> unit(xm); <br/>
+                translate([T+T,uy*yn-T,ux]) rotate([0,90,270]) polynumber(xn) unit(xm); <br/>
+                difference(){<br/>
+                    translate([T,T,ux+T])rotate([0,90,0])    polynumber(yn) unit(ym); <br/>
+                    translate([T,T+(yn*uy)-T-T,ux+T])rotate([0,90,0])cube([ux,uy,uz]); <br/>
+                    } <br/>
+                difference(){<br/>
+                    translate([uy*xn+T+T+T,T,ux+T])mirror([1,0,0])rotate([0,90,0])polynumber(yn) <br/> unit(ym); <br/>
+                    translate([uy*xn+T+T+T,T+(yn*uy)-T <br/>-T,ux+T])mirror([1,0,0])rotate([0,90,0])cube([ux,uy,uz]); <br/>
+                    } <br/>
+                } <br/>
+                
+            color("Teal")coner(uy*4+T+T+T+T,T+T+uy*7-T-T+0.001,7,-8.25); <br/>
+            color("Teal")frame(4,7,0,-1.5); <br/>
+            color("Teal")translate([0,0,5*uy+9+7.5+0.75]) frame(4,7,0,-1.5);
+            <br/></p>
+        </div>
+            
+            
+
+
+
+
+            
+        </div>
+      </div>
+    
+    <div class="context">
+        &nbsp;&nbsp;&nbsp;&nbsp;案例第二個同樣是在碩班期間，
+        某次要將蛋白質樣本送測質譜儀送測，
+        同時要提供比對資料庫。
+        當時指導教授需要我將六個物種的基因序列資料庫合併成一個，
+        且需將原本格式不同一的各檔案整理成規定格式，
+        而一個物種各有兩個檔案，一是基因名稱加上序列之文字檔 (圖一)，
+        二是基因名稱加上功能描述文字檔 (圖二)，
+        然而並不是每個基因序列都有已知的功能；也不是每個紀錄的功能都有可供比對的序列，
+        簡單來說，這兩個檔案是不完全對的上的，因此我還需要將兩檔案對不上的部分抓出來 (圖三、四)
+        ，最後再將有交叉比對到的基因名稱、功能和序列合併成一份檔案輸出 (圖五)。
+
+        <div class="flex2">
+            <div><img src="Oldfasta.png" alt="Image">
+                <div>圖一 原始基因資料 </div>
+            </div>
+            <div><img src="define.png" alt=" Image">
+                <div>圖二 原始功能描述文字檔 </div>
+            </div> </div>
+       
+
+        <din class="flex2">
+            <div><img src="Notfoundfountion.png" alt=" Image">
+                <div>圖三 整理出未比對到功能之基因名稱 </div>
+            </div>
+            <div><img src="Notfoundprotin.png" alt=" Image">
+                <div>圖四 整理出未比對到基因名稱之功能 </div>
+            </div>
+        </div>
+        
+        <div class="center">
+            <img src="Newfasta.png" alt="fasta">
+            <div>圖五 合併整理後的基因名稱加上功能和序列</div>
+        </div>
+
+
+
+        <div class="fold-container2" style="margin-top: 20px;margin-bottom: 20px;">
+            <div class="fold-header2" onclick="toggleFold2()">點擊此處以 展開/收合 案例二程式碼與說明</div>
+                 <div class="fold-content2">
+                    
+                 
+                    
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;以下是我的程式碼，其運作原理如下。
+                    首先以readlines()將檔案讀入字串數列。
+                    以grep()抓取基因序列檔案中為標題行的序數，
+                    利用gsup()編輯兩檔案中的基因名稱使其格式一致，
+                    再利用for迴圈搭配match()逐行比對兩檔案有無對不上的基因功能。
+                    以paste()將"funcion no found"字串加入基因名稱後方，
+                    並將該基因名稱額外寫入新文字文件儲存，
+                    若有比對到功能，則將功能描述文字加進序列檔案
+                    ，並以同樣之原理將查無序列的基因功能和名稱，
+                    額外寫入新文字文件儲存。</p>
+                    
+    
+                    <div class="code">
+                    # 讀取fasta檔案<br/>
+                    setwd("C:\\Users\\USER\\Desktop\\Dadabase\\populus")<br/>
+                    list.files()<br/>
+                    fasta <- readLines("Ptrichocarpa_533_v4.1.protein.fa")<br/>
+                    protein_function <- readLines("Ptrichocarpa_533_v4.1.defline.txt")<br/>
+                    modi_pro_func<- gsub("\t"," ",protein_function) <br/>
+                    pro_fun_onlyname <- gsub("\\s.*","",protein_function) <br/>
+                    pro_name_fasta<- fasta[grep(">",fasta)] <br/>
+                    namelocal<-grep(">",fasta) <br/>
+                    notfoundfunnum<-c()<br/>
+                    <br/>
+                    u<-1<br/>
+                    <br/>
+                    for (i in c(1:length(pro_name_fasta))) {<br/>
+                    <br/>  
+                      finding_1<-gsub("\\s.*","",fasta[namelocal[i]]) <br/>
+                      finding_2<-gsub("^>","",finding_1) <br/>
+                      finding_3<-gsub("\\.p$", "", finding_2) <br/>
+                      index <- match(finding_3,pro_fun_onlyname) <br/>
+                      if(is.na(index)){ <br/>
+                        fasta[namelocal[i]] <- paste(gsub("\\s.*","",fasta[namelocal[i]]),"founction not found",sep=" ")<br/>
+                        notfoundfunnum[u]<-namelocal[i] <br/>
+                        u <- u+1<br/>
+                      } else{<br/>
+                        onlyfunindex <- sub("^\\S+\\s", "",modi_pro_func[index]) <br/>
+                        fasta[namelocal[i]] <- paste(finding_1,onlyfunindex,sep=" ")<br/>
+                      }<br/>
+                    }<br/>
+                    <br/>
+                    <br/>
+                    head(fasta) <br/>
+                    writeLines(fasta,"new_fasta.fa")<br/>
+                    write.table(fasta[notfoundfunnum], file = "Not_Found_Function.txt", row.names = FALSE, col.names = FALSE, quote = FALSE) <br/>
+                    
+                    purenamefasta<-gsub("^>","",gsub("\\s.*","",fasta[grep(">",fasta)])) <br/>
+                    purenamefasta<-gsub("\\.p$", "", purenamefasta) <br/>
+                    
+                    s<-1<br/>
+                    Not_Found_protein <- c()<br/>
+                    for(t in c(1:length(pro_fun_onlyname))){ <br/>
+                    if(is.na(match(pro_fun_onlyname[t],purenamefasta))){ <br/>
+                      Not_Found_protein[s]<-modi_pro_func[t] <br/>
+                      s<-s+1<br/>
+                      }<br/>
+                    }<br/>
+                    head(Not_Found_protein) <br/>
+                    write.table(Not_Found_protein, file = "Not_Found_Protein.txt", row.names = FALSE, col.names = FALSE, quote = FALSE) <br/>
+                    <br/>
+                    rm(list = ls())<br/>
+                    </div>
+                    
+                    
+                 </div>
+            </div>
+
+        <div class="context">
+            &nbsp;&nbsp;&nbsp;&nbsp;在以上兩個案例中我所運用的知識包含了變數設定、
+            數列或字串建立、函數for()、if()、和其餘功能函數等程式語言基礎。
+            對我來說最困難的部分在於找到一個可以解決需求的函數，
+            並搞懂該函數之每一個參數，我通常會尋求網路上的資源，
+            並設立一個於與我遇到之問題相似，但較為簡化的情境反覆進行測試，
+            直到解決需求為止，因此經常耗費大量的時間，但也相當有樂趣。
+        </div>
+
+
+
+        <div id="section3" class="section-title">
+            三、如果參與這個訓練，會怎麼安排學習時間？
+        </div>
+        <div class="context">
+            &nbsp;&nbsp;&nbsp;&nbsp;如同我在自我介紹提到的，
+            目前正在服四個月兵役，預計5月2號退伍，但我目前規劃與未婚妻於四月中結婚，
+            預計會放14天婚假，如此從4月15日開始便有足夠時間完成課程進度，
+            但說實話目前還沒確定登記的日期，不排除計畫變更的可能，
+            如沒有預期的放假，我會盡我所能的在假日完成課程進度要求。            
+            <br/>&nbsp;&nbsp;&nbsp;&nbsp;我了解我的時間規劃不太適合參與課程訓練，
+            但會這麼急著要在退伍前報名也是考量到目前尚未開始工作，如錯過今年等到明年的報名時間時，應已開始工作，
+            如此就無法確定是否有餘力和時間跟上課程了，因此才會在這個時間點報名，希望貴單位能通融，
+            或是貴單位有什麼建議，我會盡力配合。
+        </div>
+
+        <div id="section4" class="section-title">
+            四、是否有想要加入的公司？為什麼想加入該公司？
+        </div>
+        <div class="context">
+            &nbsp;&nbsp;&nbsp;&nbsp; 實話說，我對於軟體工程師的工作內容認識非常有限，這也是我想在課程中學習的一部分。
+            因此目前對於該行業有哪些公司也不清楚。對於本題無法給出確切的回答。
+        </div>
+
+        
+        <div id="section5" class="section-title">
+            五、描述一件產生明顯負面情緒的經歷，如何處理該情緒？
+        </div>
+        <div class="context">
+            &nbsp;&nbsp;&nbsp;&nbsp; 產生明顯負面情緒的經歷最嚴重也是最近的一次就是剛入的第一週，
+            在入伍的第一週，我產生極度的自卑感、些微被害妄想、
+            嚴重的孤獨感並且同時累積了很大的壓力。
+            每個時刻都是請忍著淚水跟著部隊生活，
+            尤其到了每天就寢獨自一人在蚊帳隔出的小空間時，
+            總是無法壓抑像泉水一般湧出的淚水。
+            <br/>&nbsp;&nbsp;&nbsp;&nbsp; 我認為會產生以上狀況可歸咎於幾個原因，
+            包括突然面臨大量不擅長的事，還有跟滿身刺青的人相處也讓我感到害怕，
+            再來是累積了很多壓力卻沒有人可以聽我抒發。
+            面對這樣的情緒，我很快地發現我需要幫助，因此我向當時的班長求助，
+            希望尋求可以讓我調適心情的方法，
+            非常幸運地，那位班長人很好的告訴我一些心態調整的方式，接著，
+            隨著漸漸了解軍中的文化和習慣，
+            明白了罵人是軍中常見的溝通方式，
+            做錯事被罵也沒什麼大不了，
+            不需要因此否定自己，也逐漸學會跟滿身刺青的人相處，
+            且與鄰兵更加友好之後能聊天抒發情緒，原先產生負面情緒的狀況也逐漸緩解。
+        </div>
+
+        <div id="section6" class="section-title">
+            六、描關於這份申請網頁，分享一個開發時的技術心得。
+        </div>
+        <div class="context">
+            &nbsp;&nbsp;&nbsp;&nbsp; 位於網頁左側的跳轉選單和第二題中的案例程式碼收合框，
+            都是藉助chatGPT的幫助完成，讓基本上對HTML是0基礎的我，
+            能利用短暫的當兵放假時間內做出以上功能。
+            要完成類似這樣子的網頁，相比於要在google中思索要用什麼關鍵字才能找到目標資訊的幾年前，
+            有AI幫助地現在，我想至少也節省了一倍以上的時間。讓人不禁感嘆AI的方便性與強大，這也給我更強烈的動機，決定在就業前多花一些時間了解資訊工程領域。
+            <br/>&nbsp;&nbsp;&nbsp;&nbsp; 也因此在開發這個網頁遇到最大的困難就是要讀懂AI提供的程式碼，
+            以了解為什麼直接複製貼上所呈現的結果跟我預想的不一樣，並且修改成想要的樣子。
+            且為了完成我預想的排版，我從AI提供的CSS樣式中學習和模擬，以完成排版的細部更動，這部分也花費了不少時間。
+            
+        </div>
+        <div id="section7" class="section-title">
+            七、請用簡短兩三句話，描述對你而言，最重要的一項人際交往原則。
+        </div>
+        <div class="context">
+            &nbsp;&nbsp;&nbsp;&nbsp; 我認為善良是最重要的人際交往準則，
+            對人保持正向、信任、主動的關懷並體貼的給予對方所需的幫助，就是我認為的善良。
+            
+        </div>
+
+        <div id="luckycat" class="center">
+            <img src="18245.jpg" alt="Cat Image" style="width: 60% ;margin-top: 100px;">
+            <div style="font-size: 40px; font-weight: bolder;">我和好運貓貓一起感謝您的閱讀！</div>
+        </div>
+        
+
+    </div>  
+</body>
+
+    
+
+
+
