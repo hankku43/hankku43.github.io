@@ -288,6 +288,47 @@ body{
     /* background-color: #1b232d; */
 }
 
+.cursor_trace_region{
+    height: 400px;
+    width: 400px;
+    background-image: url(illustrate5.png);
+    /* background-color: transparent; */
+    border: 3px solid black;
+    background-position: center;
+    background-size: cover;
+    position: relative; 
+}
+
+#cursor_trace_thecursor{
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    z-index: 10;
+    /* border: 5px solid black; */
+}
+
+#mobile_hammer_illustrate{
+    height: 128px;
+    width: 128px;
+    display: block;
+    position: absolute;
+    transform: translate(50px, -20px);
+}
+
+.mobileHammerHittingIllustrate{
+    animation: hitIllustrate 0.05s forwards linear;
+}
+
+@keyframes hitIllustrate{
+    0%{
+        transform: translate(50px, -20px) rotate(0);
+    }
+
+    100%{
+        transform: translate(15px, -20px) rotate(-90deg);
+    }    
+}
+
 /* .hole{
     position: relative;
     background-image: url(blackhole.png);

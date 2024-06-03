@@ -23,6 +23,7 @@ const hitButtonSound = document.querySelector("#hitbutton_sound");
 const countSound = document.querySelector("#count_sound");
 const startSound = document.querySelector("#start_sound");
 const gopherHert = document.querySelector("#gopher_hert");
+console.log(startSound.volume);
 startSound.volume = 0.25;
 countSound.volume = 0.25;
 const passSound = document.querySelector("#pass_sound");
@@ -170,11 +171,13 @@ soundEffectInput.addEventListener('input', () => {
 function changePageToIntroduction(){
     entry.style.display = "none";
     gameIntroduce.style.display = "flex";
+    playRegion.style.display="grid";
 }
 
 function changePageToSetting(){
     entry.style.display = "none";
     gameSetting.style.display = "flex";
+    playRegion.style.display="grid";
 }
 
 function backToEntry(){
@@ -303,12 +306,13 @@ function ShowGopher(){
         if(gopher.classList.contains("show")){
             debug1(unhitting,currentgopher);
             hitRegion.onclick = null;
-            const hammer = hitRegion.querySelector(".hammer");
-            hammer.style.display = "block";
-            hammer.classList.add("hitting");
-
+            
             hitButtonSound.play();
-
+            
+            //攜帶裝置動畫
+            const hammer = hitRegion.querySelector(".hammer");
+            hammer.style.display = "block";    
+            hammer.classList.add("hitting");
             hitRegion.querySelector(".hitting").addEventListener("animationend",()=>{
                 setTimeout(()=>{
                     hammer.style.display = "none"; 

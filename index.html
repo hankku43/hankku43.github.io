@@ -66,7 +66,7 @@
         <div class="down">
             <div class="down_background">
                 <div class="down_content">
-                    <div id="introduction" class="square" style="display: none;">
+                    <div id="introduction" class="square" style="display: block;">
                         <h2 style="padding-left: 20px;">自我介紹</h2>
                         <hr/>
                         <div class="introduction_text">我今年初於國立臺灣大學森林系碩士畢業，日前甫兵役退伍，
@@ -111,7 +111,7 @@
                             <br/>在 AI 工具如雨後春筍地現在，我對機器學習和人工智慧有濃厚的興趣，經常於閒暇時間鑽研各種 AI 工具，像是 fliki、suno、copilot 等媒體生成工具，我總能在研究 prompt 與輸出之關聯的時候享受樂趣。此外我也不時的尋找相關網路資源和閱讀機器學習相關書籍、隨時關注並學習機器學習的最新發展和應用。
                         </div>
                     </div>
-                    <div id="portfolio_1" class="square" style="display: block;">
+                    <div id="portfolio_1" class="square" style="display: none;">
                         <h2 style="padding-left: 20px;">網頁前端工程──打地鼠遊戲開發</h2>
                         <hr/>
                         <div class="game_container">
@@ -122,7 +122,7 @@
                             <h3>說明</h3>
                                 <p>上面的打地鼠遊戲是我一個自學網頁前端的專案成果展示。在此處分享一些關於開發網頁的技術心得。</p>
                             <h3>遊戲介紹</h3>
-                                <p>目前開發進度還算是Demo試玩版，近期內會完備聲音效果和版面美化。此打地鼠遊戲具有難度關卡設計，共分3個難度，每個難度3關，達到關卡目標分數後可進入下一關，通過第三關即該難度勝利，可從主畫面進入設定頁面選擇難度。在此Demo試玩版的階段，難度僅反應在地鼠出現的頻率和停留的時間，難度越高的關卡地鼠出現的頻率上升，停留的時間減少。目前地鼠僅有2種，分為好地鼠與壞地鼠，打擊壞地鼠可加1分，而打擊壞地鼠扣3分。接下來的更新會著重在地鼠的種類新增，且反映在關卡難度上，使遊戲樂趣提高。後續的規畫擬增加存檔機制和道具系統。</p>
+                                <p>目前開發進度約90%、後續會將關卡設計完備。此打地鼠遊戲具有難度關卡設計，共分3個難度，每個難度3關，達到關卡目標分數後可進入下一關，通過第三關即該難度勝利，可從主畫面進入設定頁面選擇難度。在此Demo試玩版的階段，難度僅反應在地鼠出現的頻率和停留的時間，難度越高的關卡地鼠出現的頻率上升，停留的時間減少。目前地鼠僅有2種，分為好地鼠與壞地鼠，打擊壞地鼠可加1分，而打擊壞地鼠扣3分。接下來的更新會著重在地鼠的種類新增，且反映在關卡難度上，使遊戲樂趣提高。後續的規畫擬增加存檔機制和道具系統。</p>
                             <hr/>
                             <h3>技術心得</h3>
                             <h4>畫面設計</h4>
@@ -192,11 +192,26 @@
                                 <img src="illustrate4.jpg" style="height: auto; width: 50vw;" alt="圖片">
                             </div>
                             <p>使用transform屬性彷彿會將其子元素全部打包，雖然彼此之間仍可以照z-index設定堆疊，但就無法跟設定transform屬性主體以外的標籤產生正確z-index互動了。而我目前沒有找到直接的解決辦法，而是直接放棄使用transform屬性，直接去修改標籤的長寬達成縮小的效果。</p>                
-                            <h4>打擊事件觸發控制</h4>
-                            
+                            <h4>屬標圖案變換</h4>
+                            <p>根據我查閱資料，屬鼠標變換有兩種主要的方式，一種就是直接去更改鼠標的圖案，一種是將鼠標圖案隱藏後，新增一個會追隨滑鼠移動的圖示。而我使用的方式是前者，原因是在我嘗試後者之後，發現追蹤滑鼠位置的圖片會有稍微延遲的狀況，向下面所展示的一樣。</p>
+                            <div class="block_img_container" id="cursor_trace_region_container" style="margin: 5% 0; position: relative;;">
+                                <div class="cursor_trace_region"></div>
+                                <div id="cursor_trace_thecursor"><img src="hammer.png"/></div>
+                            </div>
+                            <p>而一個打地鼠遊戲最重要的就是反應速度，顯然不能讓鼠標延遲的狀況發生，因此我選擇使用直接更改鼠標的方式。然而直接更改鼠標圖示也有需要注意的地方，那就是圖檔大小。</p>
+                            <div class="block_img_container" style="margin: 5% 0; flex-wrap: wrap;">
+                                <img src="hammer.png" style="width: 40%; cursor: url(hammer.png) 4 4, auto;"/><img src="hammer128.png" style="width: 40%; cursor: url(hammer128.png) 4 4, auto;"/>
+                                <span style="width: 40%; text-align: center;">1024x1024 px</span><span style="width: 40%; text-align: center;">128x128 px</span>
+                            </div>
+                            <p>將鼠標移到上方圖示可以發現，當鼠標圖示的大小為1024x1024像素時，鼠標圖案沒有更改，但當鼠標圖示小於128像素時，鼠標圖示就可以進行更改(以edge瀏覽器測試結果最大接受像素即為128x128)。</p>
+                            <p>至於在沒有鼠標的行動裝置上，我則是設計了打擊地鼠才會在固定位置出現木槌動畫的設計。範例如下。</p>
+                            <div class="block_img_container" style="margin: 5% 0;">
+                                <img id="mobile_hammer_illustrate" src="hammer128.png"/>
+                                <img id="mobile_hitting_gopher_illustrate" onclick="mobileHittingIllustrate()" src="goodgopher.png" style="cursor: pointer; height: 20%; width: 20%; margin-top: 50px;" alt="圖片">
+                            </div>
                         </div>
                     </div>
-                    <div id="portfolio_2" class="square">
+                    <div id="portfolio_2" class="square" style="display: none;">
                         <h2 style="padding-left: 20px;">3D物件設計──OpanSCAD</h2>
                         <hr/>
                         <div class="portfolio_2_text">
