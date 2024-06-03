@@ -882,6 +882,14 @@ body{
         width: 100%;
     }
 
+    .game_initial_page,
+    .pass_page,
+    .fill_page,
+    .win_page{
+        background-size: contain;
+    }
+
+    
     .play_region,
     .play_region::after,
     .play_region::before{
