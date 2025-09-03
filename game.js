@@ -23,7 +23,6 @@ const hitButtonSound = document.querySelector("#hitbutton_sound");
 const countSound = document.querySelector("#count_sound");
 const startSound = document.querySelector("#start_sound");
 const gopherHert = document.querySelector("#gopher_hert");
-console.log(startSound.volume);
 startSound.volume = 0.25;
 countSound.volume = 0.25;
 const passSound = document.querySelector("#pass_sound");
