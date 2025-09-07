@@ -6,11 +6,13 @@ import { createApp } from 'vue'
 // 載入根組件
 import App from './App.vue'
 import router from './router'
+import naive from 'naive-ui'
 
 // 建立 Vue App 物件
 const app = createApp(App)
 
 app.use(router)
+app.use(naive)
 
 // 掛載到 HTML 標籤底下
 app.mount('#app')

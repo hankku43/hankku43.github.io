@@ -67,6 +67,56 @@
     <span> 性別: {{gender}} </span>
 
   </templete>
+
+  元件之間的傳遞:
+  父元件標籤給予屬性，子元件的script中以 defineProps(["屬性名稱"])
+  
+  父元件.vue
+  <script setup>
+    import 子元件 from '子元件.vue'
+  </script>
+  <templete>
+    <子元件 屬性名稱 = "屬性">
+  </templete>
+
+  子元件.vue
+  <script setup>
+    defineProps(["屬性名稱"])
+  </script>
+  <templete>
+    <div> 傳遞進來的屬性為 {{ 屬性名稱 }} </div>
+  </templete>
+
+
+  自訂事件傳遞
+  在子元件中使用 "$emit('自訂事件名稱')"觸發父元件事件
+
+  父元件.vue
+  <script setup>
+    import 子元件 from '子元件.vue';
+    let 函式名稱 = function(){};
+  </script>
+  <templete>
+    <子元件 @自訂事件名稱 = "函式名稱">
+  </templete>
+
+  子元件.vue
+  <templete>
+    <button @click="$emit('自訂事件名稱')"> 點擊傳遞事件給父元素 </button>
+  </templete>
+  或是
+  <script setup>
+    let emit = defineEmits(["自訂事件名稱"])
+    let 函式名稱 = function(){emit("自訂事件名稱")};
+  </script>
+  <templete>
+    <button @click="函式名稱"> 點擊傳遞事件給父元素 </button>
+  </templete>
+
+  常用生命週期
+  onMounted()
+  onUpdated()
+  onUnmounted()
 -->
 
 <script setup>
