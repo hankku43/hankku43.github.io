@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>古亦弘履歷</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="prism.css" />
-    <link rel="stylesheet" href="game.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/prism.css" />
+    <link rel="stylesheet" href="css/game.css" />
 </head>
 
 <body>
@@ -16,13 +16,13 @@
             <div class="gradient_color"></div>
             <div class="max945px">
                 <div class="head_color_container">
-                    <div class="head_color"><img src="headphoto.jpg" /></div>
+                    <div class="head_color"><img src="img/headphoto.jpg" /></div>
                 </div>
                 <div class="space"></div>
                 <div class="head">
                     <div class="img_region">
                         <div class="img_container">
-                            <img src="photo.png">
+                            <img src="img/photo.png">
                         </div>
                     </div>
                     <div class="information_region">
@@ -157,9 +157,9 @@
                             <h4>畫面設計</h4>
                             <p>遊戲畫面的組成由3個基本元素──背景、地鼠洞和地鼠組成，這些要素的原始圖片都是以Microsoft Copilot的影像建立工具生成的，後續再由我自行去除背景和進行調整。</p>
                             <div id="game_element_img" class="block_img_container">
-                                <img src="background.png" alt="圖片">
-                                <img src="hole.png" alt="圖片">
-                                <img src="goodgopher.png" alt="圖片">
+                                <img src="img/background.png" alt="圖片">
+                                <img src="img/hole.png" alt="圖片">
+                                <img src="img/goodgopher.png" alt="圖片">
                                 <div class="img_illustrate_region">
                                     <div class="img_illustrate">遊戲背景</div>
                                     <div class="img_illustrate">地鼠洞</div>
@@ -168,25 +168,25 @@
                             </div>
                             <p>將圖片去除背景裁切調整適當大小後，藉由z-index屬性去做深度的排列，讓地鼠有從洞裡鑽出來的視覺效果，像是下面這張圖片這樣。</p>
                             <div class="block_img_container" style="margin: 5% 0;">
-                                <img src="illustrate1.jpg" style="height: auto; width: 50vw;" alt="圖片">
+                                <img src="img/illustrate1.jpg" style="height: auto; width: 50vw;" alt="圖片">
                             </div>
                             <p>雖然看起來僅有三張圖片組成，但其實拆分成多個，實際是模擬透視圖應該是下面這樣。</p>
                             <div class="block_img_container" style="margin: 5% 0;">
-                                <img src="illustrateperspective.png" style="height: auto; width: 50vw;" alt="圖片">
+                                <img src="img/illustrateperspective.png" style="height: auto; width: 50vw;" alt="圖片">
                             </div>
                             <p>上面的示意圖中，可以看到我將大背景額外複製了一個前景去做地鼠在地下身體的遮擋，並且將洞口分為上下兩部分，並將其的z-index依深度進行設定。</p>
                             <h4>z-index的限制</h4>
                             <p>最初我的構想是將地鼠洞分為洞內漆黑部分、洞口上方土堆和洞口下方3個部分，並以偽元素(pseudo-elements)的方式組成，加上地鼠後以z-index做出層次，如下左圖所示。然而這樣實際執行起來卻變成右圖的樣子。
                             </p>
                             <div class="block_img_container" style="margin: 5% 0; flex-wrap: wrap;">
-                                <img src="illustrate3.png" style="height: auto; width: 90%;" alt="圖片">
+                                <img src="img/illustrate3.png" style="height: auto; width: 90%;" alt="圖片">
                             </div>
                             <p>探究其原因後發現，我在撰寫地鼠和地鼠洞的HTML程式碼時，編排兩者層狀結構是在同一父元素之下的並列子元素，而作為土堆的偽元素則是地鼠洞子元素。也就是下面所寫的這樣：</p>
                             <div class="code_container" style="width: 100%;height: auto; ">
                                 <pre><code class="language-html line-numbers" style="height: auto;"> &lt;!-- HTML --&gt;
 &lt;div class="set"&gt;
     &lt;div class="hole"&gt;&lt;/div&gt;
-    &lt;div class="gopher"&gt;&lt;img src="gopher.png" alt="gopher"&gt;&lt;/div&gt;
+    &lt;div class="gopher"&gt;&lt;img src="img/gopher.png" alt="gopher"&gt;&lt;/div&gt;
 &lt;/div&gt;</code></pre>
                             </div>
 
@@ -222,7 +222,7 @@
                             <p>除了標籤階層問題，還有另一個CSS屬性也會影響z-index的設定，那就是transform。仔細看的話會發現我後3排的地鼠和地鼠洞因應背景的透視有做縮小。但如果使用transform:
                                 scale()屬性達成縮小目的的話，會造成以下的狀況發生：</p>
                             <div class="block_img_container" style="margin: 5% 0;">
-                                <img src="illustrate4.jpg" style="height: auto; width: 50vw;" alt="圖片">
+                                <img src="img/illustrate4.jpg" style="height: auto; width: 50vw;" alt="圖片">
                             </div>
                             <p>使用transform屬性彷彿會將其子元素全部打包，雖然彼此之間仍可以照z-index設定堆疊，但就無法跟設定transform屬性主體以外的標籤產生正確z-index互動了。而我目前沒有找到直接的解決辦法，而是直接放棄使用transform屬性，直接去修改標籤的長寬達成縮小的效果。
                             </p>
@@ -232,12 +232,12 @@
                             <div class="block_img_container" id="cursor_trace_region_container"
                                 style="margin: 5% 0; position: relative;;">
                                 <div class="cursor_trace_region"></div>
-                                <div id="cursor_trace_thecursor"><img src="hammer.png" /></div>
+                                <div id="cursor_trace_thecursor"><img src="img/hammer.png" /></div>
                             </div>
                             <p>而一個打地鼠遊戲最重要的就是反應速度，顯然不能讓鼠標延遲的狀況發生，因此我選擇使用直接更改鼠標的方式。然而直接更改鼠標圖示也有需要注意的地方，那就是圖檔大小。</p>
                             <div class="block_img_container" style="margin: 5% 0; flex-wrap: wrap;">
-                                <img src="hammer.png" style="width: 40%; cursor: url(hammer.png) 4 4, auto;" /><img
-                                    src="hammer128.png" style="width: 40%; cursor: url(hammer128.png) 4 4, auto;" />
+                                <img src="img/hammer.png" style="width: 40%; cursor: url(img/hammer.png) 4 4, auto;" /><img
+                                    src="img/hammer128.png" style="width: 40%; cursor: url(img/hammer128.png) 4 4, auto;" />
                                 <span style="width: 40%; text-align: center;">1024x1024 px</span><span
                                     style="width: 40%; text-align: center;">128x128 px</span>
                             </div>
@@ -245,9 +245,9 @@
                             </p>
                             <p>至於在沒有鼠標的行動裝置上，我則是設計了打擊地鼠才會在固定位置出現木槌動畫的設計。範例如下。</p>
                             <div class="block_img_container" style="margin: 5% 0;">
-                                <img id="mobile_hammer_illustrate" src="hammer128.png" />
+                                <img id="mobile_hammer_illustrate" src="img/hammer128.png" />
                                 <img id="mobile_hitting_gopher_illustrate" onclick="mobileHittingIllustrate()"
-                                    src="goodgopher.png"
+                                    src="img/goodgopher.png"
                                     style="cursor: pointer; height: 20%; width: 20%; margin-top: 50px;" alt="圖片">
                             </div>
                         </div>
@@ -263,7 +263,7 @@
                             而OpanSCAD是一供程式設計師進行實體建模的軟體工具，以程式語言的邏輯和參數化的設計，進行3D物品的建模。
                             <h3>作品──角鋼雙層架</h3>
                             <div class="block_img_container">
-                                <img src="iron.png" />
+                                <img src="img/iron.png" />
                             </div>
                             <h3>步驟一</h3>
                             角鋼是一剖面L型的長鐵條，L型兩個平面上規律佈滿著不同樣式的鎖孔，鎖孔的排列方式具有一定的規律，
@@ -379,7 +379,7 @@ translate([0,uy/2+m-uy,20])       //短邊中間圓洞循環
                                 </div>
                                 <div class="video_container">
                                     <video autoplay muted playsinline loop>
-                                        <source src="unit iron spin.mp4" type="video/mp4">無法顯示影片
+                                        <source src="video/unit iron spin.mp4" type="video/mp4">無法顯示影片
                                     </video>
                                 </div>
                             </div>
@@ -417,7 +417,7 @@ color("Teal")translate([0,0,5*uy+9+7.5+0.75]) frame(4,7,0,-1.5);//繪製上層�
                                 </div>
                                 <div class="video_container">
                                     <video autoplay muted playsinline loop>
-                                        <source src="spin iron.mp4" type="video/mp4">無法顯示影片
+                                        <source src="video/spin iron.mp4" type="video/mp4">無法顯示影片
                                     </video>
                                 </div>
                             </div>
@@ -426,8 +426,7 @@ color("Teal")translate([0,0,5*uy+9+7.5+0.75]) frame(4,7,0,-1.5);//繪製上層�
                 </div>
             </div>
 </body>
-<script src="game.js"></script>
-<script src="javescrip.js"></script>
-<script src="prism.js"></script>
+<script src="js/javescrip.js"></script>
+<script src="js/prism.js"></script>
 
 </html>
