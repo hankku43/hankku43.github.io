@@ -1,3 +1,123 @@
+<!-- 
+標準的vue寫法:
+<script setup></script> 
+<templete></templete>
+<style scope></style>
+
+語法範例1:
+  嵌入純文字:   {{ 變數名稱 }}
+  嵌入屬性:     <div v-bing:屬性名稱="變數名稱">內文</div>
+                <div :屬性名稱="變數名稱">內文</div>
+  嵌入HTML標籤: <div v-html="變數名稱">
+
+  常用變化:
+    文字變換大寫 {{ 變數名稱.toUpperCase() }}
+    搭配三元運算  :color="布林值變數?'red':'green'"
+
+語法範例2:
+  判斷式: <div v-if="變數名稱 >=< 2000"></div>
+          <div v-else-if="判斷式"></div>
+          <div v-else></div>
+
+  迴圈:   <div v-for="變數 in 陣列變數">陣列中有 {{變數}}</div>
+          <div v-for="(變數, 序數) in 陣列變數">陣列中第{{序數}}個是{{變數}}</div>
+          <div v-for="(value, key) in 物件變數">物件中有{{key}}的值是{{value}}</div>
+
+語法範例3:
+  事件處理:  <button v-on:click="方法變數"></button>
+            <button @click="方法變數"></button>
+            <button @mouseover="方法變數"></button>
+    修飾字:  <button @click.once="方法變數"></button> 僅觸發一次
+            <a @click.prevent="方法變數" href="網址"></a> 停止預設行為(a 標籤點擊不會導向)
+
+語法範例4:
+  響應式: 
+  <script set up>
+    let 變數名稱 = ref("內容");
+    let 方法名稱 = function(){變數名稱.value =  "新內容"};
+  </script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+  <templete>
+   <div @click="方法名稱">{{ 變數名稱 }}</div>
+  </templete>
+
+  輸入元件響應:
+  <script set up>
+    let 變數名稱 = ref("內容");
+    let gender = ref(null);
+    let array = ref([]);
+  </script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+  <templete>
+    <input type="text" v-model="變數名稱"></input>
+    <span> {{變數名稱}} </span>
+
+    <input type="radio" value="F" v-model="gender">
+    <input type="radio" value="M" v-model="gender">
+    <span> 性別: {{gender}} </span>
+
+    <input type="checkbox" value="A" v-model="array">
+    <input type="checkbox" value="B" v-model="array">
+    <input type="checkbox" value="C" v-model="array">
+    <span> 選擇的有: {{array}} </span>
+
+    <select v-model="gender">
+      <option value="" selected disabled>請選擇</option>
+      <option value="M">男</option>
+      <option value="F">女</option>
+    </select>
+    <span> 性別: {{gender}} </span>
+
+  </templete>
+
+  元件之間的傳遞:
+  父元件標籤給予屬性，子元件的script中以 defineProps(["屬性名稱"])
+  
+  父元件.vue
+  <script setup>
+    import 子元件 from '子元件.vue'
+  </script>
+  <templete>
+    <子元件 屬性名稱 = "屬性">
+  </templete>
+
+  子元件.vue
+  <script setup>
+    defineProps(["屬性名稱"])
+  </script>
+  <templete>
+    <div> 傳遞進來的屬性為 {{ 屬性名稱 }} </div>
+  </templete>
+
+
+  自訂事件傳遞
+  在子元件中使用 "$emit('自訂事件名稱')"觸發父元件事件
+
+  父元件.vue
+  <script setup>
+    import 子元件 from '子元件.vue';
+    let 函式名稱 = function(){};
+  </script>
+  <templete>
+    <子元件 @自訂事件名稱 = "函式名稱">
+  </templete>
+
+  子元件.vue
+  <templete>
+    <button @click="$emit('自訂事件名稱')"> 點擊傳遞事件給父元素 </button>
+  </templete>
+  或是
+  <script setup>
+    let emit = defineEmits(["自訂事件名稱"])
+    let 函式名稱 = function(){emit("自訂事件名稱")};
+  </script>
+  <templete>
+    <button @click="函式名稱"> 點擊傳遞事件給父元素 </button>
+  </templete>
+
+  常用生命週期
+  onMounted()
+  onUpdated()
+  onUnmounted()
+-->
 <template>
   <n-config-provider :theme="isDark ? darkTheme : null">
     <div :class="{ 'mode-dark': isDark }">
@@ -5,10 +125,10 @@
       <!-- Header -->
       <header class="site-header">
         <div class="left">
-          <div class="brand">古亦弘 • WeHelp</div>
+          <div class="brand">古亦弘 • WeHelp 深度學習課程申請</div>
         </div>
         <div class="right">
-          <n-switch v-model:value="isDark" size="small" aria-label="切換深色/淺色模式">
+          <n-switch v-model:value="isDark" size="large" aria-label="切換深色/淺色模式">
             <template #checked-icon>
               <span class="switch-icon">🌙</span>
             </template>
@@ -22,7 +142,7 @@
       <!-- Hero -->
       <section class="hero">
         <div class="hero-inner">
-          <h1 class="hero-title">歡迎 — 我是 古亦弘</h1>
+          <h1 class="hero-title">歡迎 WeHelp Academy 團隊</h1>
           <p class="hero-sub">申請 WeHelp Academy｜前端工程師訓練生</p>
           <n-button type="primary" size="large" class="hero-btn" @click="scrollTo('intro')">開始閱讀</n-button>
           <div class="scroll-indicator" @click="scrollTo('intro')">⬇️</div>
