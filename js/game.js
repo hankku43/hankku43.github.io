@@ -76,7 +76,7 @@ function muteBGM(){
         currentBGM = BGM.volume * 2;
         BGM.volume = 0;
         const volumeImg = document.querySelector(".bgmsetting_region img");
-        volumeImg.src="thenosound.png";
+        volumeImg.src="../img/thenosound.png";
         const input = bgmInput;
         input.value = 0;
         const volumeText = document.querySelector("#bgm_volume");
@@ -87,9 +87,9 @@ function muteBGM(){
         BGM.volume = currentBGM/2;
         const volumeImg = document.querySelector(".bgmsetting_region img");
         if(currentBGM > 0.5){
-            volumeImg.src="thesound.png";
+            volumeImg.src="../img/thesound.png";
         }else{
-            volumeImg.src="thehelfsound.png";
+            volumeImg.src="../img/thehelfsound.png";
         }
         const input = bgmInput;
         input.value = currentBGM * 100;
@@ -106,7 +106,7 @@ function muteEffect(){
         soundEffectVolume = 0;
         writingSoundEffect(soundEffectVolume);
         const volumeImg = document.querySelector(".soundeffectsetting_region img");
-        volumeImg.src="thenosound.png";
+        volumeImg.src="../img/thenosound.png";
         const input = soundEffectInput;
         input.value = 0;
         const volumeText = document.querySelector("#sound_volume");
@@ -118,9 +118,9 @@ function muteEffect(){
         writingSoundEffect(soundEffectVolume);
         const volumeImg = document.querySelector(".soundeffectsetting_region img");
         if(soundEffectVolume > 0.5){
-            volumeImg.src="thesound.png";
+            volumeImg.src="../img/thesound.png";
         }else{
-            volumeImg.src="thehelfsound.png";
+            volumeImg.src="../img/thehelfsound.png";
         }
         const input = soundEffectInput;
         input.value = soundEffectVolume * 100;
@@ -137,11 +137,11 @@ bgmInput.addEventListener('input', () => {
     BGM.volume = (volume / 100)/2;
     volumeText.textContent = volume;
     if(volume > 50){
-        volumeImg.src = "img/thesound.png";
+        volumeImg.src = "../img/thesound.png";
     } else if (volume <= 50 && volume != 0){
-        volumeImg.src = "img/thehelfsound.png";
+        volumeImg.src = "../img/thehelfsound.png";
     } else {
-        volumeImg.src = "img/thenosound.png";
+        volumeImg.src = "../img/thenosound.png";
         currentBGM = 0.5;
     }
     console.log("BGM.volume: "+BGM.volume);
@@ -155,11 +155,11 @@ soundEffectInput.addEventListener('input', () => {
     writingSoundEffect(soundEffectVolume);
     volumeText.textContent = volume;
     if(volume > 50){
-        volumeImg.src = "img/thesound.png";
+        volumeImg.src = "../img/thesound.png";
     } else if (volume <= 50 && volume != 0){
-        volumeImg.src = "img/thehelfsound.png";
+        volumeImg.src = "../img/thehelfsound.png";
     } else {
-        volumeImg.src = "img/thenosound.png";
+        volumeImg.src = "../img/thenosound.png";
         currentEffect = 0.5;
     }
     console.log("soundEffectVolume: "+hoverSound.volume);
