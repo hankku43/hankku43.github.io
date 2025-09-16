@@ -59,11 +59,11 @@ function mobileHittingIllustrate(){
     const mobileHammerIllustrate = document.querySelector("#mobile_hammer_illustrate");
     mobileHammerIllustrate.style.display = "block";    
     mobileHammerIllustrate.classList.add("mobileHammerHittingIllustrate");
-    document.querySelector("#mobile_hitting_gopher_illustrate").src="dizzygoodgopher.png";
+    document.querySelector("#mobile_hitting_gopher_illustrate").src="./img/dizzygoodgopher.png";
     document.querySelector(".mobileHammerHittingIllustrate").addEventListener("animationend",()=>{
         setTimeout(()=>{
             mobileHammerIllustrate.style.display = "none"; 
-            document.querySelector("#mobile_hitting_gopher_illustrate").src="goodgopher.png"
+            document.querySelector("#mobile_hitting_gopher_illustrate").src="./img/goodgopher.png"
         },300);                               
     },{once:true});
 
