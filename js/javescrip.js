@@ -1,3 +1,9 @@
+const params = new URLSearchParams(window.location.search);
+let tab = parseInt(params.get('tab'), 10);
+if (!isNaN(tab) && tab >= 0 && tab <= 2) {
+    switch_tag(`tag_portfolio_${tab}`, `portfolio_underline_${tab}`, `portfolio_${tab}`);
+}
+
 function switch_tag(tag_id,underline_id,block_id){
     let all_block = document.querySelectorAll(".square");
     for(let i=0; i<all_block.length; i++){
