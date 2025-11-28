@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pandas 視覺化實驗室：Inplace vs 賦值</title>
+<style>
+    :root {
+        --primary: #4a90e2;
+        --success: #2ecc71;
+        --danger: #e74c3c;
+        --warning: #f1c40f;
+        --dark: #2c3e50;
+        --light: #f8f9fa;
+        --code-bg: #1e1e1e;
+        --shadow: 0 10px 30px rgba(0,0,0,0.1);
+        --purple: #9b59b6;
+    }
+
+    body {
+        font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        background-color: #eef2f5;
+        margin: 0;
+        padding: 40px 20px;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    h1 { margin-bottom: 10px; color: var(--dark); }
+    p.subtitle { color: #666; margin-bottom: 30px; max-width: 600px; text-align: center; }
+
+    /* 主要佈局 */
+    .main-stage {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 30px;
+        max-width: 1100px;
+        width: 100%;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        margin-bottom: 30px;
+    }
+
+    /* 左側：控制與程式碼 */
+    .control-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .code-editor {
+        background: var(--code-bg);
+        border-radius: 10px;
+        padding: 20px;
+        color: #d4d4d4;
+        font-family: 'Fira Code', 'Consolas', monospace;
+        position: relative;
+        border-left: 5px solid transparent;
+        transition: border-color 0.3s;
+    }
+
+    .code-editor.active-mode-wrong { border-left-color: var(--danger); }
+    .code-editor.active-mode-right { border-left-color: var(--success); }
+
+    .token-func { color: #dcdcaa; }
+    .token-str { color: #ce9178; }
+    .token-kw { color: #569cd6; }
+    .token-var { color: #9cdcfe; }
+    
+    .highlight-bad { background: rgba(231, 76, 60, 0.2); padding: 2px 4px; border-radius: 4px; border: 1px solid var(--danger); }
+    .highlight-good { background: rgba(46, 204, 113, 0.2); padding: 2px 4px; border-radius: 4px; border: 1px solid var(--success); }
+
+    .explanation-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        min-height: 120px;
+    }
+    
+    .step-badge {
+        display: inline-block;
+        background: var(--dark);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+    }
+
+    /* 右側：視覺化區域 */
+    .viz-container {
+        position: relative;
+        background: #fafafa;
+        border-radius: 15px;
+        border: 2px dashed #ddd;
+        height: 400px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    /* DataFrame 表格樣式 */
+    .data-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: absolute;
+        width: 140px;
+    }
+
+    .data-table th { background: #e9ecef; color: #555; padding: 10px; font-size: 0.9rem; border-bottom: 2px solid #ddd; }
+    .data-table td { border: 1px solid #eee; padding: 12px; text-align: center; font-weight: bold; position: relative; }
+    
+    .val-nan { color: #ccc; font-style: italic; }
+    .val-new { color: var(--success); font-weight: 800; transform: scale(1.2); display: inline-block; }
+
+    /* 定位 */
+    #mainTable { left: 50px; top: 100px; z-index: 10; }
+    #tempTable { left: 50px; top: 100px; z-index: 20; opacity: 0; pointer-events: none; border: 2px solid var(--primary); }
+
+    /* 垃圾桶動畫元件 */
+    .trash-bin {
+        position: absolute;
+        right: 40px;
+        bottom: 40px;
+        font-size: 3rem;
+        opacity: 0.3;
+        transition: all 0.3s;
+    }
+    .trash-active { opacity: 1; transform: scale(1.1); color: var(--danger); }
+
+    /* 標籤 */
+    .table-label {
+        position: absolute;
+        top: -25px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 0.8rem;
+        color: #888;
+        font-weight: bold;
+    }
+
+    /* 按鈕群組 */
+    .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+    
+    button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: transform 0.1s, opacity 0.2s;
+        font-size: 0.95rem;
+    }
+    
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-mode-1 { background: #ffebee; color: var(--danger); border: 1px solid var(--danger); }
+    .btn-mode-1.active { background: var(--danger); color: white; }
+    
+    .btn-mode-2 { background: #e8f5e9; color: var(--success); border: 1px solid var(--success); }
+    .btn-mode-2.active { background: var(--success); color: white; }
+
+    .btn-next { background: var(--dark); color: white; flex-grow: 1; }
+    .btn-reset { background: #e0e0e0; color: #555; }
+
+    /* 動畫狀態 Classes */
+    .move-out { transform: translate(180px, 0); opacity: 1 !important; }
+    .fade-into-trash { transform: translate(300px, 150px) scale(0.2) rotate(45deg); opacity: 0 !important; }
+    .merge-back { transform: translate(0, 0); z-index: 30; }
+    .highlight-update { background-color: #d4edda; transition: background-color 0.5s; }
+
+    /* **************************************** */
+    /* 新增：進階解析區塊樣式 (Deep Dive) */
+    /* **************************************** */
+    .advanced-section {
+        max-width: 1100px;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .deep-dive-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .deep-dive-header {
+        background: var(--purple);
+        color: white;
+        padding: 20px 30px;
+    }
+
+    .deep-dive-header h3 { margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+    .deep-dive-body { padding: 30px; }
+
+    .concept-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 25px;
+    }
+
+    .concept-box {
+        border: 2px solid #eee;
+        border-radius: 12px;
+        padding: 20px;
+        background: #fafafa;
+        position: relative;
+    }
+
+    .concept-box h4 { margin-top: 0; color: #555; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    
+    .concept-icon { font-size: 3rem; text-align: center; margin: 15px 0; }
+    
+    .status-tag {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        margin-top: 10px;
+        width: fit-content;
+    }
+
+    .status-lucky { background: #e8f5e9; color: #27ae60; }
+    .status-unlucky { background: #ffebee; color: #c0392b; }
+
+    .silent-failure-alert {
+        margin-top: 25px;
+        background: #fff3e0;
+        border-left: 5px solid #ff9800;
+        padding: 20px;
+        border-radius: 5px;
+        color: #e65100;
+        line-height: 1.6;
+    }
+
+    /* 專家觀點區塊 (保持原樣，位置微調) */
+    .info-box {
+        background: #e3f2fd;
+        border-left: 5px solid var(--primary);
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 1100px;
+        width: 100%;
+        line-height: 1.6;
+    }
+    .info-box strong { color: var(--primary); }
+
+    @media (max-width: 768px) {
+        .main-stage { grid-template-columns: 1fr; }
+        .viz-container { height: 300px; }
+        .concept-grid { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Pandas 視覺化實驗室</h1>
+<p class="subtitle">為什麼你會收到 <code>SettingWithCopyWarning</code>？為什麼 <code>inplace=True</code> 經常無效？<br>透過動態演示，一次搞懂 Pandas 的資料流向。</p>
+
+<div class="main-stage">
+    <!-- 左側控制區 (同前) -->
+    <div class="control-panel">
+        <div class="btn-group">
+            <button class="btn-mode-1" id="btnMode1" onclick="selectMode('inplace')">❌ 模式一：Inplace (隱患)</button>
+            <button class="btn-mode-2" id="btnMode2" onclick="selectMode('assignment')">✅ 模式二：賦值 (推薦)</button>
+        </div>
+
+        <div class="code-editor" id="codeEditor">
+            <div style="margin-bottom: 5px; color: #666; font-size: 0.8rem;"># Python Code</div>
+            <span class="token-var">df</span>[<span class="token-str">'Age'</span>]... <span style="color:#555">// 請選擇模式</span>
+        </div>
+
+        <div class="explanation-card">
+            <div class="step-badge" id="stepBadge">準備就緒</div>
+            <div id="explanationText">請點擊上方按鈕選擇一種操作模式來開始實驗。</div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-reset" onclick="reset()">🔄 重置</button>
+            <button class="btn-next" id="btnNext" onclick="nextStep()" disabled>下一步 ▶</button>
+        </div>
+    </div>
+
+    <!-- 右側視覺化區 (同前) -->
+    <div class="viz-container">
+        <!-- 原始 DataFrame -->
+        <div id="mainTable" class="data-table">
+            <div class="table-label">原始 DataFrame</div>
+            <table>
+                <tr><th>ID</th><th>Age</th></tr>
+                <tr><td>1</td><td class="cell-m-1 val-nan">NaN</td></tr>
+                <tr><td>2</td><td>30</td></tr>
+                <tr><td>3</td><td class="cell-m-3 val-nan">NaN</td></tr>
+            </table>
+        </div>
+
+        <!-- 臨時副本 Series -->
+        <div id="tempTable" class="data-table">
+            <div class="table-label">臨時副本 (Slice)</div>
+            <table>
+                <tr><th>Age</th></tr>
+                <tr><td class="cell-t-1 val-nan">NaN</td></tr>
+                <tr><td>30</td></tr>
+                <tr><td class="cell-t-3 val-nan">NaN</td></tr>
+            </table>
+        </div>
+
+        <div class="trash-bin" id="trashBin">🗑️</div>
+    </div>
+</div>
+
+<!-- 新增：進階解密區塊 -->
+<div class="advanced-section">
+    <div class="deep-dive-card">
+        <div class="deep-dive-header">
+            <h3>🕵️‍♀️ 進階解密：薛丁格的 Pandas (Schrödinger's Pandas)</h3>
+        </div>
+        <div class="deep-dive-body">
+            <p style="font-size: 1.1rem; color: #444;">你可能會問：「但我有時候寫 <code>inplace=True</code> 是成功的啊？」</p>
+            <p>這正是這個寫法最「邪惡」的地方。當你執行 <code>df['col']</code> 時，Pandas 會根據當下記憶體的碎片化程度，決定給你以下兩者之一：</p>
+            
+            <div class="concept-grid">
+                <!-- 情境 A -->
+                <div class="concept-box">
+                    <h4>情形 A：拿到 View (視圖)</h4>
+                    <div class="concept-icon">🪟</div>
+                    <p><b>概念：</b>就像透過窗口直接看原始資料。記憶體沒有被複製。</p>
+                    <p><b>結果：</b>你在 View 上修改，原始資料也跟著變了。</p>
+                    <div class="status-tag status-lucky">🎉 運氣好：修改成功</div>
+                </div>
+
+                <!-- 情境 B -->
+                <div class="concept-box">
+                    <h4>情形 B：拿到 Copy (副本)</h4>
+                    <div class="concept-icon">📄</div>
+                    <p><b>概念：</b>就像拿去影印機印了一張新的紙。記憶體是獨立的。</p>
+                    <p><b>結果：</b>你在影印紙上修改，原始資料完全沒動。</p>
+                    <div class="status-tag status-unlucky">😱 運氣差：修改失敗</div>
+                </div>
+            </div>
+
+            <div class="silent-failure-alert">
+                <strong>🚨 最危險的情況：靜默失敗 (Silent Failure)</strong><br>
+                最可怕的不是程式報錯 (Error)，而是程式<b>沒有報錯，但資料沒存進去</b>。這取決於底層運氣，導致你的程式碼可能在開發機上是好的 (拿到 View)，上線後卻壞了 (拿到 Copy)。<br>
+                <br>
+                因此，<b>不要賭運氣</b>。請永遠使用 <code>df['col'] = ...</code> 明確賦值，這能保證 100% 成功。
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="info-box">
+    <h3>💡 專家觀點：Pandas 3.0 的未來</h3>
+    <p>很多教學會說 <code>inplace=True</code> 可以節省記憶體，但這在 Pandas 中<strong>通常是迷思</strong>。Pandas 底層設計經常無法真正做到原地修改，而是「複製一份、修改、然後替換」。</p>
+    <p><strong>Pandas 開發團隊已經計畫在未來版本 (3.0+) 移除多數函數的 <code>inplace</code> 參數</strong>。現在開始養成使用賦值 <code>df = df.method()</code> 的習慣，不僅程式碼更清晰，也符合未來的標準。</p>
+</div>
+
+<script>
+    // 這裡的 JS 代碼與之前完全相同
+    const codeEditor = document.getElementById('codeEditor');
+    const explanationText = document.getElementById('explanationText');
+    const stepBadge = document.getElementById('stepBadge');
+    const btnNext = document.getElementById('btnNext');
+    const btnMode1 = document.getElementById('btnMode1');
+    const btnMode2 = document.getElementById('btnMode2');
+    
+    // 視覺元素
+    const mainTable = document.getElementById('mainTable');
+    const tempTable = document.getElementById('tempTable');
+    const trashBin = document.getElementById('trashBin');
+    
+    // 儲存格
+    const mainCells = [document.querySelector('.cell-m-1'), document.querySelector('.cell-m-3')];
+    const tempCells = [document.querySelector('.cell-t-1'), document.querySelector('.cell-t-3')];
+
+    let currentMode = null;
+    let step = 0;
+
+    function reset() {
+        step = 0;
+        currentMode = null;
+        
+        // UI Reset
+        codeEditor.className = 'code-editor';
+        codeEditor.innerHTML = `<div style="margin-bottom: 5px; color: #666; font-size: 0.8rem;"># Python Code</div><span class="token-var">df</span>[<span class="token-str">'Age'</span>]... <span style="color:#555">// 請選擇模式</span>`;
+        explanationText.innerText = "請點擊上方按鈕選擇一種操作模式來開始實驗。";
+        stepBadge.innerText = "準備就緒";
+        stepBadge.style.background = "#2c3e50";
+        
+        btnMode1.classList.remove('active');
+        btnMode2.classList.remove('active');
+        btnNext.disabled = true;
+        btnNext.innerText = "下一步 ▶";
+
+        // Visual Reset
+        tempTable.className = 'data-table'; // remove anim classes
+        tempTable.style.opacity = '0';
+        trashBin.classList.remove('trash-active');
+        
+        // Data Reset
+        mainCells.forEach(c => { c.innerHTML = 'NaN'; c.className = 'val-nan'; c.parentElement.classList.remove('highlight-update'); });
+        tempCells.forEach(c => { c.innerHTML = 'NaN'; c.className = 'val-nan'; });
+    }
+
+    function selectMode(mode) {
+        reset();
+        currentMode = mode;
+        btnNext.disabled = false;
+        step = 0; // Ready to start step 1
+
+        if (mode === 'inplace') {
+            btnMode1.classList.add('active');
+            codeEditor.classList.add('active-mode-wrong');
+            codeEditor.innerHTML = `
+                <span class="token-var">df</span>[<span class="token-str">'Age'</span>].<span class="token-func">fillna</span>(28, <span class="token-kw highlight-bad">inplace=True</span>)
+            `;
+            explanationText.innerHTML = "您選擇了 <b style='color:var(--danger)'>Inplace 模式</b>。這是一種常見的錯誤或不建議的寫法。試試看會發生什麼事？";
+        } else {
+            btnMode2.classList.add('active');
+            codeEditor.classList.add('active-mode-right');
+            codeEditor.innerHTML = `
+                <span class="token-var">df</span>[<span class="token-str">'Age'</span>] <span class="token-kw highlight-good">=</span> <span class="token-var">df</span>[<span class="token-str">'Age'</span>].<span class="token-func">fillna</span>(28)
+            `;
+            explanationText.innerHTML = "您選擇了 <b style='color:var(--success)'>賦值模式 (Assignment)</b>。這是 Pandas 官方推薦的標準寫法。";
+        }
+    }
+
+    function nextStep() {
+        step++;
+        stepBadge.innerText = `步驟 ${step}/3`;
+
+        if (currentMode === 'inplace') {
+            runInplaceScenario();
+        } else {
+            runAssignmentScenario();
+        }
+    }
+
+    function runInplaceScenario() {
+        if (step === 1) {
+            // 切片產生
+            tempTable.classList.add('move-out');
+            explanationText.innerHTML = "<strong>1. 提取 (Slicing)：</strong><br>當你執行 <code>df['Age']</code> 時，Pandas 可能會為此欄位建立一個「臨時副本 (Copy)」而非直接連結原資料的視圖。";
+        } else if (step === 2) {
+            // 修改副本
+            tempCells.forEach(c => {
+                c.innerHTML = '28';
+                c.className = 'val-new';
+            });
+            explanationText.innerHTML = "<strong>2. 修改 (Modifying)：</strong><br><code>fillna(inplace=True)</code> 確實執行了！但它是在這個「臨時副本」上進行修改，填入了 28。";
+        } else if (step === 3) {
+            // 丟棄
+            tempTable.classList.add('fade-into-trash');
+            trashBin.classList.add('trash-active');
+            
+            explanationText.innerHTML = "<strong style='color:var(--danger)'>3. 遺失 (Lost)：</strong><br>程式碼結束後，這個臨時變數沒有被指派給任何人，因此被 Python 的垃圾回收機制丟棄。原始 DataFrame 毫髮無傷，你的修改無效了！";
+            btnNext.disabled = true;
+            btnNext.innerText = "演示結束";
+            stepBadge.style.background = "var(--danger)";
+        }
+    }
+
+    function runAssignmentScenario() {
+        if (step === 1) {
+            // 計算右側
+            tempTable.classList.add('move-out');
+            explanationText.innerHTML = "<strong>1. 計算 (Calculation)：</strong><br>程式碼右側 <code>df['Age'].fillna(28)</code> 先執行。Pandas 提取資料並計算出一個全新的 Series。";
+        } else if (step === 2) {
+            // 填值
+            tempCells.forEach(c => {
+                c.innerHTML = '28';
+                c.className = 'val-new';
+            });
+            explanationText.innerHTML = "<strong>2. 產生結果 (Result)：</strong><br>記憶體中產生了一份填補好數值 (28) 的新資料。此時它還懸在空中，等待指令。";
+        } else if (step === 3) {
+            // 賦值覆蓋
+            tempTable.classList.remove('move-out');
+            tempTable.classList.add('merge-back');
+            
+            // 稍微延遲讓動畫跑一下再變色
+            setTimeout(() => {
+                tempTable.style.opacity = '0'; // hide temp
+                mainCells.forEach(c => {
+                    c.innerHTML = '28';
+                    c.className = 'val-new';
+                    c.parentElement.classList.add('highlight-update');
+                });
+            }, 600);
+
+            explanationText.innerHTML = "<strong style='color:var(--success)'>3. 賦值 (Assignment)：</strong><br>關鍵在於等號 <code>=</code>。它明確告訴 Pandas：「把這份新資料拿去覆蓋 df['Age']」。資料成功更新！";
+            btnNext.disabled = true;
+            btnNext.innerText = "成功更新";
+            stepBadge.style.background = "var(--success)";
+        }
+    }
+</script>
+
+</body>
+</html>
