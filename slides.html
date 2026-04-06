@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccomPartner — AI 鋼琴伴奏生成系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Poppins:wght@400;600;700&family=Montserrat:wght@700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- 1. SETUP --- */
+        :root {
+            --bg-main: #ffffff;
+            --bg-surface: #f8fafc;
+            --text-main: #273e51;
+            --text-muted: #64748b;
+            --accent-purple: #745ae9;
+            --accent-pink: #f95696;
+            --gradient-tech: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
+            --border-light: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; }
+        p, h1, h2, h3, ul, li { margin: 0; }
+
+        body {
+            background-color: #cbd5e1;
+            display: grid;
+            gap: 30px;
+            grid-template-columns: 1fr;
+            margin: 0;
+            min-height: 100vh;
+            padding: 30px 0;
+            place-items: center;
+        }
+
+        .slide-container {
+            align-items: center;
+            background-color: var(--bg-main);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            font-family: 'Noto Sans TC', sans-serif;
+            height: 720px;
+            justify-content: center;
+            overflow: hidden;
+            padding: 50px 60px;
+            position: relative;
+            width: 1280px;
+            background-image: radial-gradient(circle at 100% 0%, rgba(116, 90, 233, 0.04) 0%, transparent 40%),
+                              radial-gradient(circle at 0% 100%, rgba(249, 86, 150, 0.04) 0%, transparent 40%);
+        }
+
+        .slide-container > * { z-index: 1; position: relative; }
+
+        .slide-number {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* --- 2. TYPOGRAPHY --- */
+        .slide-container h1, .slide-container h2, .slide-container h3 {
+            font-family: 'Montserrat', 'Noto Sans TC', sans-serif;
+            color: var(--text-main);
+            font-weight: 800;
+        }
+
+        .slide-container p, .slide-container li {
+            font-family: 'Noto Sans TC', sans-serif;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 17px;
+        }
+
+        .gradient-text {
+            background: var(--gradient-tech);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .slide-container .slide-title {
+            font-size: 40px;
+            margin-bottom: 28px;
+            text-align: left;
+            width: 100%;
+            position: relative;
+            padding-left: 20px;
+        }
+        .slide-container .slide-title::before {
+            content: ''; position: absolute; left: 0; top: 5px; bottom: 5px; width: 6px;
+            background: var(--gradient-tech); border-radius: 4px;
+        }
+
+        .content-area { display: flex; flex-direction: column; flex-grow: 1; width: 100%; justify-content: center; }
+
+        /* --- 3. LAYOUTS --- */
+        .title-layout { text-align: center; }
+        .title-layout h1 { font-size: 68px; letter-spacing: -1px; margin-bottom: 20px; line-height: 1.1; }
+        .title-layout .subtitle { font-size: 22px; font-weight: 500; margin-top: 15px; color: var(--text-muted); }
+        .title-layout .meta { margin-top: 35px; font-family: 'Poppins', sans-serif; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); font-weight: 600; }
+
+        .section-title-layout { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .section-title-layout h3 { color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: 22px; margin-bottom: 10px; }
+        .section-title-layout h2 { font-size: 54px; }
+        .section-title-layout .line { width: 80px; height: 6px; background: var(--gradient-tech); border-radius: 3px; margin: 28px 0; }
+        .section-title-layout p { font-size: 18px; color: var(--text-muted); max-width: 700px; text-align: center; }
+
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; align-items: start; }
+        .two-column h3 { font-size: 24px; margin-bottom: 12px; }
+        .two-column ul { padding-left: 22px; margin-top: 10px; }
+        .two-column li { margin-bottom: 10px; }
+
+        .tiled-content { display: flex; gap: 22px; width: 100%; justify-content: center; align-items: stretch; }
+        .tile { background-color: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border-light); padding: 28px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .tile .icon { font-size: 34px; margin-bottom: 14px; background: var(--gradient-tech); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .tile h3 { font-size: 21px; margin-bottom: 10px; }
+
+        .two-column.tiled > div { background-color: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border-light); padding: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); align-self: stretch; }
+
+        /* Tables */
+        .tech-table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--bg-main); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-light); }
+        .tech-table th, .tech-table td { padding: 13px 18px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 15px; }
+        .tech-table th { background: var(--bg-surface); color: var(--accent-purple); font-weight: 700; font-family: 'Poppins', sans-serif; }
+        .tech-table tr:last-child td { border-bottom: none; }
+
+        /* Code Block */
+        .code-block { background: #1e293b; color: #e2e8f0; font-family: 'Fira Code', monospace; padding: 18px; border-radius: 12px; font-size: 14px; text-align: left; overflow-x: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); line-height: 1.6; }
+        .code-block .keyword { color: #c678dd; }
+        .code-block .string { color: #98c379; }
+        .code-block .comment { color: #5c6370; font-style: italic; }
+
+        /* Flowchart */
+        .flow-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 28px; width: 100%; }
+        .flow-box { background: var(--bg-surface); border: 2px solid var(--accent-purple); border-radius: 12px; padding: 18px 16px; text-align: center; flex: 1; font-weight: 600; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 15px; line-height: 1.4; }
+        .flow-arrow { font-size: 22px; color: var(--accent-pink); flex-shrink: 0; }
+
+        /* Q&A */
+        .qa-layout { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .qa-layout h2 { font-size: 80px; font-family: 'Montserrat', sans-serif; font-weight: 800; }
+
+        /* Tag Badge */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; }
+        .badge-purple { background: rgba(116,90,233,0.1); color: var(--accent-purple); }
+        .badge-pink { background: rgba(249,86,150,0.1); color: var(--accent-pink); }
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<div class="slide-container" id="slide1">
+    <div class="title-layout">
+        <h1><span class="gradient-text">AccomPartner</span></h1>
+        <p class="subtitle">AI 鋼琴伴奏生成系統：資料處理、模型設計與全端實作</p>
+        <p class="meta">System Architecture &amp; Technical Overview</p>
+    </div>
+    <div class="slide-number">1 / 18</div>
+</div>
+
+<!-- Slide 2: Agenda -->
+<div class="slide-container" id="slide2">
+    <h2 class="slide-title">議程概覽</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-database"></i></div>
+                <h3>Phase 1：資料工程</h3>
+                <p>POP909 資料集清洗、MIDI Tokenization、兩套切分策略</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-brain"></i></div>
+                <h3>Phase 2：模型設計</h3>
+                <p>模型演化歷程：從原生 Transformer 到 Hugging Face BART，以及三種和弦預測架構</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-server"></i></div>
+                <h3>Phase 3：全端系統</h3>
+                <p>三種推論模式、FastAPI 後端、Vue 3 前端音訊渲染與樂譜顯示</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>Phase 4：部署與反思</h3>
+                <p>Docker 容器化、Rate Limiting、工程挑戰與解法</p>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">2 / 18</div>
+</div>
+
+<!-- Slide 3: Section — Phase 1 -->
+<div class="slide-container" id="slide3">
+    <div class="section-title-layout">
+        <h3>Phase 1</h3>
+        <h2><span class="gradient-text">資料工程與清洗</span></h2>
+        <div class="line"></div>
+        <p>從 POP909 原始 MIDI 到可訓練的 Token 序列</p>
+    </div>
+    <div class="slide-number">3 / 18</div>
+</div>
+
+<!-- Slide 4: Preprocessing Pipeline -->
+<div class="slide-container" id="slide4">
+    <h2 class="slide-title">資料清洗流程 (Preprocessing Pipeline)</h2>
+    <div class="content-area">
+        <p style="margin-bottom: 22px;">針對 POP909 資料集，以 <strong>downbeat 對齊</strong>取代等長切割，建立統一的清洗邏輯：</p>
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-wave-square"></i></div>
+                <h3>Downbeat 對齊</h3>
+                <p>讀取 <code>beat_midi.txt</code> 提取強拍位置，動態建立小節視窗，適應曲速變化。並偵測保留樂句開頭的弱起拍 (Anacrusis)。</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-sliders"></i></div>
+                <h3>調性正規化</h3>
+                <p>依 POP909 附帶的 <code>key_audio.txt</code> 逐段分析調性，將所有樂曲轉調至 <strong>C 大調或 A 小調</strong>，縮小模型的學習空間。</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-music"></i></div>
+                <h3>延音踏板補償</h3>
+                <p>依踏板訊號延長音符 duration，並加入<strong>防重疊偵測</strong>（若延長後超過同音高的下一音符起點，則截斷）。</p>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">4 / 18</div>
+</div>
+
+<!-- Slide 5: Two Slicing Strategies -->
+<div class="slide-container" id="slide5">
+    <h2 class="slide-title">兩套切分策略 (Data Slicing)</h2>
+    <div class="content-area">
+        <p style="margin-bottom: 22px;">底層清洗邏輯相同，依模型任務衍生出兩套切分方式：</p>
+        <div class="two-column tiled">
+            <div style="border: 2px solid var(--accent-purple);">
+                <h3 style="color: var(--accent-purple);">4-Bar 視窗（多小節伴奏）</h3>
+                <p>提供上下文給 Stage 2 伴奏生成模型，理解長期樂句走向：</p>
+                <ul style="margin-top: 12px; margin-bottom: 12px; background: var(--bg-main); padding: 12px 12px 12px 32px; border-radius: 8px;">
+                    <li><strong style="color: var(--accent-purple);">Input：</strong>4 小節單軌（主旋律）</li>
+                    <li><strong style="color: var(--accent-purple);">Output：</strong>對應 4 小節伴奏</li>
+                </ul>
+                <p style="font-size: 14px; color: var(--accent-purple);">→ 用於 Melody Editor 與 Advanced Mode</p>
+            </div>
+            <div style="border: 2px solid var(--accent-pink);">
+                <h3 style="color: var(--accent-pink);">1-Bar 視窗（Next-Bar Prediction）</h3>
+                <p>為即時伴奏打造，一次處理 2 個連續小節：</p>
+                <ul style="margin-top: 12px; margin-bottom: 12px; background: var(--bg-main); padding: 12px 12px 12px 32px; border-radius: 8px;">
+                    <li><strong style="color: var(--accent-pink);">Input：</strong>第 1 小節雙軌（旋律 + 伴奏）</li>
+                    <li><strong style="color: var(--accent-pink);">Output：</strong>第 2 小節伴奏</li>
+                </ul>
+                <p style="font-size: 14px; color: var(--accent-pink);">→ 用於 Realtime Piano 瀏覽器端推論</p>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">5 / 18</div>
+</div>
+
+<!-- Slide 6: Tokenization -->
+<div class="slide-container" id="slide6">
+    <h2 class="slide-title">Tokenization (Symusic + MidiTok REMI)</h2>
+    <div class="content-area">
+        <div class="two-column" style="align-items: center;">
+            <div>
+                <h3 style="color: var(--accent-purple);">為何選擇 Symusic？</h3>
+                <p>底層 C++ 實作，在處理 POP909 全量資料集時，批次讀取與轉換速度遠優於純 Python 的 music21。</p>
+                <h3 style="color: var(--accent-pink); margin-top: 22px;">REMI 序列結構</h3>
+                <p>將多軌 MIDI 編碼為一維 Token 序列。透過 <code>Program</code> Token 區分旋律與伴奏軌：</p>
+            </div>
+            <div>
+                <div class="code-block">
+                    <span class="comment"># Token 序列範例（雙軌合一）</span><br><br>
+                    [<span class="keyword">Program_0</span>] <span class="comment"># 宣告：旋律軌</span><br>
+                    [<span class="string">Bar_0</span>] [<span class="string">Position_16</span>] <span class="comment"># 時間定位</span><br>
+                    [<span class="keyword">Pitch_60</span>] [<span class="keyword">Velocity_80</span>] [<span class="keyword">Duration_1.5.0</span>]<br>
+                    <br>
+                    [<span class="keyword">Program_1</span>] <span class="comment"># 宣告：伴奏軌</span><br>
+                    [<span class="string">Bar_0</span>] [<span class="string">Position_16</span>]<br>
+                    [<span class="keyword">Pitch_48</span>] [<span class="keyword">Pitch_52</span>] [<span class="keyword">Pitch_55</span>] <span class="comment"># 和弦</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">6 / 18</div>
+</div>
+
+<!-- Slide 7: Section — Phase 2 -->
+<div class="slide-container" id="slide7">
+    <div class="section-title-layout">
+        <h3>Phase 2</h3>
+        <h2><span class="gradient-text">核心模型設計</span></h2>
+        <div class="line"></div>
+        <p>從 PyTorch 原生 Transformer 到 Hugging Face BART，以及 NAR 和弦預測架構</p>
+    </div>
+    <div class="slide-number">7 / 18</div>
+</div>
+
+<!-- Slide 8: Model Evolution -->
+<div class="slide-container" id="slide8">
+    <h2 class="slide-title">伴奏生成模型演化</h2>
+    <div class="content-area">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>版本</th>
+                    <th>架構</th>
+                    <th>任務設計</th>
+                    <th>目前用途</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">One-Stage</td>
+                    <td><code>PyTorch nn.Transformer</code></td>
+                    <td>直接 Melody → Accompaniment，4-Bar 視窗，不依賴和弦標註</td>
+                    <td>Melody Editor 後端</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">Two-Stage (Chord)</td>
+                    <td><code>PyTorch nn.Transformer × 2</code></td>
+                    <td>Stage 1 預測和弦序列，Stage 2 將旋律 + 和弦拼接後生成伴奏</td>
+                    <td>Advanced Mode 後端</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">Next-Accom (BART)</td>
+                    <td><code>Hugging Face BartForConditionalGeneration</code></td>
+                    <td>Next-Bar Prediction：輸入當前小節雙軌，預測下一小節伴奏</td>
+                    <td>Realtime Piano（ONNX 量化部署）</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="slide-number">8 / 18</div>
+</div>
+
+<!-- Slide 9: Chord Predictors -->
+<div class="slide-container" id="slide9">
+    <h2 class="slide-title">三種和弦預測架構（Stage 1 Predictors）</h2>
+    <div class="content-area">
+        <p style="margin-bottom: 20px;">Two-Stage 流程中，Stage 1 負責從旋律預測和弦序列，我們實作了三種架構：</p>
+        <div class="tiled-content">
+            <div class="tile">
+                <h3 style="font-size: 20px; color: var(--text-main);">V1：標準 AR</h3>
+                <p style="font-size: 14px; margin-bottom: 8px; color: var(--accent-purple); font-weight: bold;">Autoregressive</p>
+                <p style="font-size: 15px;">標準自迴歸解碼，逐 Token 預測和弦。輸出格式最單純。</p>
+            </div>
+            <div class="tile">
+                <h3 style="font-size: 20px; color: var(--text-main);">V2：小節感知 AR</h3>
+                <p style="font-size: 14px; margin-bottom: 8px; color: var(--accent-purple); font-weight: bold;">Bar-Aware AR</p>
+                <p style="font-size: 15px;">在 Target 序列中插入 <code>Pos_X</code> 位置標記，強化模型對拍內位置的感知，和弦切換點更整齊。</p>
+            </div>
+            <div class="tile">
+                <h3 style="font-size: 20px; color: var(--text-main);">V3：非自迴歸 NAR</h3>
+                <p style="font-size: 14px; margin-bottom: 8px; color: var(--accent-purple); font-weight: bold;">Non-Autoregressive</p>
+                <p style="font-size: 15px;">移除 Decoder Causal Mask，一次讀取完整 4 小節旋律並平行輸出所有和弦，推論速度最快。</p>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">9 / 18</div>
+</div>
+
+<!-- Slide 10: Model Architecture Comparison -->
+<div class="slide-container" id="slide10">
+    <h2 class="slide-title">所有模型架構超參數比較</h2>
+    <div class="content-area">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>模型</th>
+                    <th>框架</th>
+                    <th>Enc / Dec Layers</th>
+                    <th>d_model / Heads / FFN</th>
+                    <th>關鍵設計差異</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">One-Stage</td>
+                    <td><code>nn.Transformer</code></td>
+                    <td><code>4 / 4</code></td>
+                    <td><code>256 / 8 / 1024</code></td>
+                    <td>單一詞彙表 embedding，Melody → Accompaniment 直接對應</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">Two-Stage：Stage 2<br><span style="font-size:13px; font-weight:400;">(伴奏生成)</span></td>
+                    <td><code>nn.Transformer</code></td>
+                    <td><code>4 / 4</code></td>
+                    <td><code>256 / 8 / 1024</code></td>
+                    <td>額外 <code>chord_embedding</code>，與旋律在 Encoder 端 <strong>Concat</strong> 後輸入</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">Two-Stage：Stage 1<br><span style="font-size:13px; font-weight:400;">(和弦預測)</span></td>
+                    <td><code>nn.Transformer</code></td>
+                    <td><code>4 / <strong style="color:var(--accent-pink);">2</strong></code></td>
+                    <td><code>256 / 8 / 1024</code></td>
+                    <td>Decoder 輕量化至 2 層（和弦序列短）；支援 NAR 模式（移除 Causal Mask）</td>
+                </tr>
+                <tr style="background: rgba(116,90,233,0.03);">
+                    <td style="font-weight: bold; color: var(--accent-pink);">Next-Accom (BART)</td>
+                    <td><code>BartForConditionalGeneration</code></td>
+                    <td><code>4 / 4</code></td>
+                    <td><code>256 / 8 / 1024</code></td>
+                    <td>KV Cache、GELU 激活、max\_pos=2048；可匯出 ONNX INT8 在瀏覽器推論</td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="margin-top: 18px; background: var(--bg-surface); border-radius: 10px; padding: 13px 20px; border-left: 4px solid var(--accent-pink);">
+            <p style="font-size: 14px;">
+                <strong>為何 Realtime Piano 選 BART：</strong>
+                前三個模型均為 PyTorch <code>nn.Transformer</code>，需自行實作 KV Cache 與採樣策略。
+                BART 直接提供 <code>model.generate()</code> API（Top-K / Top-P）與 <code>optimum</code> 量化工具，
+                是瀏覽器端 ONNX 部署的最短路徑。
+            </p>
+        </div>
+    </div>
+    <div class="slide-number">10 / 18</div>
+</div>
+
+<!-- Slide 11: NAR Lookahead -->
+<div class="slide-container" id="slide11">
+    <h2 class="slide-title">NAR 閃爍問題與 Lookahead 平滑</h2>
+    <div class="content-area">
+        <div class="two-column" style="align-items: center;">
+            <div>
+                <h3>問題：NAR 的和弦閃爍 (Flickering)</h3>
+                <p>NAR 模型因缺乏 Token 間的強依賴，容易受局部旋律外音干擾，在相鄰位置預測出短暫跳變的和弦（如 C → G → C）。</p>
+                <h3 style="margin-top: 22px;">解法：Lookahead 前向預看</h3>
+                <p>推論時介入機率分佈：比較當前與下一步的 Top-1 預測，若兩者一致且下一步信心度更高，則鎖定此和弦並向後延伸，抑制短暫跳變。</p>
+                <p style="margin-top: 10px;">另加入<strong>重複懲罰</strong>（同一和弦連續 4+ 次則降低 logit），防止過度鎖定。</p>
+            </div>
+            <div>
+                <div style="background: var(--bg-surface); padding: 28px; border-radius: 16px; border: 2px solid var(--border-light); text-align: center;">
+                    <i class="fa-solid fa-chart-line" style="font-size: 44px; color: var(--accent-purple); margin-bottom: 14px;"></i>
+                    <h3 style="font-size: 19px;">平滑修正示例</h3>
+                    <p style="font-family: monospace; font-size: 16px; margin-top: 14px; color: var(--text-muted); line-height: 2;">
+                        Raw:      [ C, C, <span style="color:var(--accent-pink)">G</span>, C, C ]<br>
+                        Window:   size = 2<br>
+                        Smoothed: [ C, C, <span style="color:var(--accent-purple); font-weight:bold;">C</span>, C, C ]
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">11 / 18</div>
+</div>
+
+<!-- Slide 12: Section — Phase 3 -->
+<div class="slide-container" id="slide12">
+    <div class="section-title-layout">
+        <h3>Phase 3</h3>
+        <h2><span class="gradient-text">全端系統實作</span></h2>
+        <div class="line"></div>
+        <p>FastAPI 後端、Vue 3 前端，以及三種不同的推論路徑</p>
+    </div>
+    <div class="slide-number">12 / 18</div>
+</div>
+
+<!-- Slide 13: Three Modes -->
+<div class="slide-container" id="slide13">
+    <h2 class="slide-title">三種推論模式</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <!-- Realtime Piano：不走後端，用粉紅色系突顯 -->
+            <div class="tile" style="border: 2px solid var(--accent-pink);">
+                <div class="icon" style="color: var(--accent-pink); background: none; -webkit-text-fill-color: var(--accent-pink);"><i class="fa-solid fa-bolt"></i></div>
+                <h3 style="color: var(--accent-pink);">Realtime Piano</h3>
+                <span class="badge badge-pink" style="margin-bottom: 10px; display: inline-block;">Edge Inference（無後端）</span>
+                <p>ONNX INT8 量化模型，透過 Transformers.js 在瀏覽器端推論。Next-Bar Prediction：彈完一小節，自動預測下一小節伴奏。</p>
+            </div>
+            <!-- Melody Editor & Advanced Mode：都走 FastAPI，統一紫色 -->
+            <div class="tile" style="border: 2px solid var(--accent-purple);">
+                <div class="icon"><i class="fa-solid fa-pen-nib"></i></div>
+                <h3 style="color: var(--accent-purple);">Melody Editor</h3>
+                <span class="badge badge-purple" style="margin-bottom: 10px; display: inline-block;">POST /api/generate-from-json</span>
+                <p>Grid Pad 輸入旋律（JSON 格式），呼叫後端 <code>oneStage_service</code>，回傳 MIDI binary。</p>
+            </div>
+            <div class="tile" style="border: 2px solid var(--accent-purple);">
+                <div class="icon"><i class="fa-solid fa-sliders"></i></div>
+                <h3 style="color: var(--accent-purple);">Advanced Mode</h3>
+                <span class="badge badge-purple" style="margin-bottom: 10px; display: inline-block;">POST /api/generate-from-midi</span>
+                <p>上傳 MIDI，選擇旋律音軌，調整 Creativity / Complexity 參數，呼叫 <code>twoStage_service</code>，回傳 MIDI + 和弦進行。</p>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">13 / 18</div>
+</div>
+
+<!-- Slide 14: System Architecture Data Flow -->
+<div class="slide-container" id="slide14">
+    <h2 class="slide-title">系統資料流（Architecture Overview）</h2>
+    <div class="content-area">
+        <p style="text-align: center; margin-bottom: 18px;">前後端透過 JSON / MIDI 傳遞，Realtime Piano 則繞過後端在瀏覽器端直接推論：</p>
+
+        <div class="flow-container">
+            <div class="flow-box">
+                <i class="fa-brands fa-vuejs" style="font-size: 28px; color: #42b883; display: block; margin-bottom: 8px;"></i>
+                Vue 3 + Pinia<br>
+                <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">UI / Web Audio</span>
+            </div>
+
+            <div class="flow-arrow"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+
+            <div class="flow-box" style="border-color: var(--text-muted); background: var(--bg-main);">
+                <i class="fa-solid fa-file-code" style="font-size: 28px; color: var(--text-muted); display: block; margin-bottom: 8px;"></i>
+                JSON / MIDI<br>
+                <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">Pydantic Schema</span>
+            </div>
+
+            <div class="flow-arrow"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+
+            <div class="flow-box" style="border-color: var(--accent-pink);">
+                <i class="fa-solid fa-server" style="font-size: 28px; color: var(--accent-pink); display: block; margin-bottom: 8px;"></i>
+                FastAPI<br>
+                <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">Router → Controller → Service</span>
+            </div>
+
+            <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+            <div class="flow-box" style="background: var(--text-main); color: white; border-color: var(--text-main);">
+                <i class="fa-solid fa-brain" style="font-size: 28px; color: white; display: block; margin-bottom: 8px;"></i>
+                PyTorch Models<br>
+                <span style="font-size: 13px; font-weight: 400; color: #cbd5e1;">One-Stage / Two-Stage</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; background: var(--bg-surface); border-radius: 10px; padding: 14px 20px; border-left: 4px solid var(--accent-purple);">
+            <p style="font-size: 14px;">
+                <strong>Realtime Piano 例外：</strong>跳過 FastAPI，Vue 透過 <code>@huggingface/transformers</code> 直接在瀏覽器載入 ONNX 量化模型推論，零後端網路往返。
+            </p>
+        </div>
+    </div>
+    <div class="slide-number">14 / 18</div>
+</div>
+
+<!-- Slide 15: Audio Engine -->
+<div class="slide-container" id="slide15">
+    <h2 class="slide-title">音訊渲染引擎（Tone.js + AudioService）</h2>
+    <div class="content-area">
+        <div class="two-column" style="align-items: center;">
+            <div>
+                <h3 style="color: var(--accent-purple);">為何使用 Tone.js？</h3>
+                <p>原生 <code>&lt;audio&gt;</code> 標籤不支援 MIDI 多音發聲與精確 BPM 對齊。Tone.js 提供：</p>
+                <ul style="margin-top: 12px;">
+                    <li><strong>Sampler：</strong>載入真實鋼琴取樣音色</li>
+                    <li><strong>Polyphony：</strong>同時觸發多個音節（和弦）</li>
+                    <li><strong>Transport：</strong>精確 BPM 排程，確保音符觸發時間對齊</li>
+                </ul>
+            </div>
+            <div>
+                <div style="background: var(--bg-surface); padding: 28px; border-radius: 16px; border: 2px solid var(--border-light);">
+                    <h3 style="font-size: 20px; margin-bottom: 10px;">Singleton AudioService</h3>
+                    <p style="font-size: 14px; margin-bottom: 14px;">解決 Vue 組件切換導致的 Web Audio 資源重複建立與記憶體洩漏：</p>
+                    <div class="code-block" style="padding: 14px; font-size: 13px;">
+                        <span class="keyword">class</span> AudioService {<br>
+                        &nbsp;&nbsp;<span class="keyword">constructor</span>() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (!AudioService.instance) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">this</span>.piano = <span class="keyword">new</span> Tone.Sampler({...});<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AudioService.instance = <span class="keyword">this</span>;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> AudioService.instance;<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">15 / 18</div>
+</div>
+
+<!-- Slide 16: Score Rendering -->
+<div class="slide-container" id="slide16">
+    <h2 class="slide-title">動態樂譜渲染（VexFlow）</h2>
+    <div class="content-area">
+        <div class="two-column" style="align-items: center;">
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fa-solid fa-music" style="font-size: 100px; color: var(--text-muted); opacity: 0.2; display: block;"></i>
+                    <i class="fa-solid fa-code" style="font-size: 60px; color: var(--accent-pink); margin-top: -30px; margin-left: 50px; display: inline-block;"></i>
+                </div>
+            </div>
+            <div>
+                <h3>從 Token 到五線譜</h3>
+                <p style="margin-top: 10px;">Advanced Mode 回傳的 MIDI 資料與和弦序列，在前端即時解析並繪製：</p>
+                <ul style="margin-top: 12px;">
+                    <li><strong>VexFlow Canvas 繪製：</strong>在 <code>&lt;canvas&gt;</code> 上渲染西洋五線譜</li>
+                    <li><strong>即時映射：</strong>MIDI 音符 → <code>StaveNote</code>，和弦名稱 → <code>ChordSymbol</code></li>
+                    <li><strong>多小節自動斷行：</strong>依 Canvas 寬度計算斷行位置，維持閱讀舒適度</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="slide-number">16 / 18</div>
+</div>
+
+<!-- Slide 17: Section — Phase 4 -->
+<div class="slide-container" id="slide17">
+    <div class="section-title-layout">
+        <h3>Phase 4</h3>
+        <h2><span class="gradient-text">部署與工程挑戰</span></h2>
+        <div class="line"></div>
+        <p>Docker 容器化、Rate Limiting 與四個典型問題的解法</p>
+    </div>
+    <div class="slide-number">17 / 18</div>
+</div>
+
+<!-- Slide 18: Challenges & Deployment (merged final slide) -->
+<div class="slide-container" id="slide18">
+    <h2 class="slide-title">工程挑戰與解法</h2>
+    <div class="content-area">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>挑戰</th>
+                    <th>影響</th>
+                    <th>解法</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">1. 即時伴奏有網路延遲</td>
+                    <td>API 往返造成音符停頓，無法實現即時彈奏感</td>
+                    <td>導入 Transformers.js，將 ONNX 量化模型移至瀏覽器端執行</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">2. NAR 和弦閃爍</td>
+                    <td>相鄰拍預測出短暫跳變和弦，造成伴奏聽感不連貫</td>
+                    <td>實作 Lookahead 平滑：比較前後步機率，鎖定穩定和弦並壓低跳變</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">3. 多音軌 Web Audio 破音</td>
+                    <td>組件切換導致多個 AudioContext 並存，資源耗盡或發生爆音</td>
+                    <td>Singleton AudioService 統一管理 Tone.Sampler 生命週期；前處理踏板補償防重疊</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: var(--accent-purple);">4. 部署安全與穩定</td>
+                    <td>推論耗資源，後端需防護惡意請求</td>
+                    <td>SlowAPI Rate Limit（5 req/min），MIDI 上傳限 10MB，CORS 白名單；Docker Compose 一鍵啟動</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="slide-number">18 / 18</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const slides = document.querySelectorAll('.slide-container');
+        const total = slides.length;
+        slides.forEach((slide, index) => {
+            const el = slide.querySelector('.slide-number');
+            if (el) el.textContent = `${index + 1} / ${total}`;
+        });
+    });
+</script>
+</body>
+</html>
